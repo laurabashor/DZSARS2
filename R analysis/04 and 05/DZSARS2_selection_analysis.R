@@ -133,7 +133,7 @@ rm(first) # clean up
 
 #### Stats for nucleotide diversity over time ####
 
-# use a linear mixed model to show statistical difference over time and among species 
+# use a linear mixed model to show statistical difference over time 
 # accounting for repeated measures of the same individual over time
 
 # for stats, outcome variable does not need to be normally distributed as a univariate variable
@@ -146,7 +146,16 @@ rm(first) # clean up
 #Anova(lmm_mod_sp, type = "3")
 
 # dpi is significant, species interaction is not so drop * to +
-lmm_pi <- lmer(mean_pi ~ dpi + species + (1|animal_ID), pop)
+# lmm_pi <- lmer(mean_pi ~ dpi + species + (1|animal_ID), pop)
+# Anova(lmm_pi, type = "3")
+# summary(lmm_pi)
+# lmm_pi
+
+# we only have enough data points to look at lions, so make a new df with only lions
+lion_pop <- pop %>% filter(species == "lion")
+
+# write model for lion mean pi over time
+lmm_pi <- lmer(mean_pi ~ dpi + (1|animal_ID), lion_pop)
 Anova(lmm_pi, type = "3")
 summary(lmm_pi)
 lmm_pi
@@ -179,9 +188,10 @@ qqnorm(resid(lmm_pi)) # Q-Q plot, looks good
 # try for species interaction first
 # lmm_piS_sp <- lmer(mean_piS ~ dpi*species + (1|animal_ID), pop)
 # Anova(lmm_piS_sp, type = "3") #nothing sig
+# species interaction is not sig so would drop * to + if including species
 
-# species interaction is not sig so drop * to +
-lmm_piS <- lmer(mean_piS ~ dpi + species + (1|animal_ID), pop)
+# write model just for lions:
+lmm_piS <- lmer(mean_piS ~ dpi + (1|animal_ID), lion_pop)
 Anova(lmm_piS, type = "3")
 lmm_piS
 summary(lmm_piS)
@@ -199,12 +209,22 @@ sjPlot::tab_model(lmm_pi, lmm_piS,
                   digits.re = 12, #11 digits
                   p.style = "numeric_stars",
                   show.re.var = TRUE,
-                  pred.labels = c("(Intercept)", "Time (days after first positive test)", "Species [lion]", "Species [tiger]"),
-                  dv.labels = c("Nucleotide diversity", "Synonymous nucleotide diversity"))
-                 # file = "lmm_stats_table.html")
+                  pred.labels = c("(Intercept)", "Time (days after first positive test)"),
+                  dv.labels = c("Nucleotide diversity", "Synonymous nucleotide diversity")) #,
+#file = "03_output/lmm_stats_table_20250731.html")
+
+# sjPlot::tab_model(lmm_pi, lmm_piS,
+#                   show.ci = F,
+#                   digits = 6,
+#                   digits.re = 12, #11 digits
+#                   p.style = "numeric_stars",
+#                   show.re.var = TRUE,
+#                   pred.labels = c("(Intercept)", "Time (days after first positive test)", "Species [lion]", "Species [tiger]"),
+#                   dv.labels = c("Nucleotide diversity", "Synonymous nucleotide diversity"))
+#                  # file = "lmm_stats_table.html")
 
 
-####### Plotting #######
+####### Plot Fig 4 synonymous nucleotide diversity #######
 
 # not normal distribution, left skewed
 hist(pop$mean_pi) 
@@ -255,40 +275,88 @@ pop %>%
 # all 6 hyenas had piN>piS overall
 
 
-##### plot for nucleotide diversity, linear mixed effects model #####
+##### plot Figure 4 for nucleotide diversity #####
 
-# for linear mixed models, we plot marginal effects 
-# show the slopes assoc. with species and dpi effects
-
-# plot separate slopes for fixed effects
+## plot all sp nucleotide diversity together
 lmm_div_plot <- ggplot(pop, aes(x=dpi, y=mean_pi, fill=species)) +
   geom_point(size = 3, alpha = 0.8, pch=21, stroke=0.2) +
-  geom_line(aes(y=predict(lmm_pi), group=animal_ID, color=species), 
-            alpha=0.8, show.legend=F) + # lines show model predictions
   labs(x = "Days since first positive test", 
        y = expression("Within-host\nnucleotide diversity"~(pi)),
-       fill = "Host species") +
+       fill = "Host\nspecies") +
   scale_fill_manual(values = c(
     "#FC6666" ,"#FEB853","#6666FF"),
     labels = c("Tiger", "Lion", "Hyena")) +
   scale_color_manual(values = c(
     "#FC6666" ,"#FEB853","#6666FF"),
     labels = c("Tiger", "Lion", "Hyena")) +
-    theme_bw() +
+  theme_bw() +
   theme(axis.text = element_text(size=12),
         axis.title = element_text(size=14),
         legend.text = element_text(size=12),
         legend.title = element_text(size=14),
         plot.margin= margin(0.1,0.5,0.1,0.5, "in")) 
 
-lmm_div_plot
+leg <- get_legend(lmm_div_plot)
 
 
-#### make composite plot Figure 4: expansion & diversification ####
+# plot nucleotide diversity in lions
+lmm_div_plot_lions <- ggplot(lion_pop, aes(x=dpi, y=mean_pi, fill=species)) +
+  geom_point(size = 3, alpha = 0.8, pch=21, stroke=0.2) +
+  labs(x = "Days since first positive test", 
+       y = expression("Within-host nucleotide diversity"~(pi)),
+       fill = "Host species") +
+  scale_fill_manual(values = c(
+    #"#FC6666" ,
+    "#FEB853","#6666FF"),
+    labels = c(#"Tiger", 
+      "Lion", "Hyena")) +
+  scale_color_manual(values = c(
+    #"#FC6666" ,
+    "#FEB853","#6666FF"),
+    labels = c(#"Tiger", 
+      "Lion", "Hyena")) +
+  theme_bw() +
+  theme(axis.text = element_text(size=12),
+        axis.title = element_text(size=14),
+        legend.position = "none",
+        plot.margin= margin(0.1,0.5,0.1,0.5, "in")) 
 
-ggarrange(lmm_div_plot, Ne_plot, ncol=1, labels="AUTO", 
-          font.label = list(size = 16),heights = c(1.2,2))
-ggsave("fig4_virus_populations.pdf", width=8.5, height=11)
+lmm_div_plot_lions
+
+lmm_div_plot_tigers <- ggplot(pop %>% filter(species !="lion"), 
+                              aes(x=dpi, y=mean_pi, fill=species)) +
+  geom_point(size = 3, alpha = 0.8, pch=21, stroke=0.2) +
+  labs(x = "Days since first positive test", 
+       fill = "Host species") +
+  scale_fill_manual(values = c(
+    "#FC6666" ,"#6666FF"),
+    labels = c("Tiger", "Hyena")) +
+  scale_color_manual(values = c(
+    "#FC6666" ,"#6666FF"),
+    labels = c( "Tiger", "Hyena")) +
+  theme_bw() +
+  theme(axis.text = element_text(size=12),
+        axis.title = element_text(size=14),
+        axis.title.y = element_blank(),
+        legend.position = "none",
+        plot.margin= margin(0.1,0.5,0.1,0.5, "in")) 
+
+lmm_div_plot_tigers
+
+lmm_div_plot_tigers2 <- plot_grid(lmm_div_plot_tigers, leg, rel_widths = c(0.8, 0.2)) # Adjust widths as needed
+
+lmm_div_plot_tigers2
+
+# Arrange plot1 and plot2 side-by-side
+div_plots <- ggarrange(lmm_div_plot_lions, lmm_div_plot_tigers2, ncol=2, labels = c("A", "B"),
+                       font.label = list(size=16))
+
+# Arrange the combined plots above the Ne_plot
+final_arrangement <- ggarrange(div_plots, Ne_plot, nrow = 2, labels = c("", "C"),
+                               font.label = list(size=16), heights = c(1.2, 2))
+
+final_arrangement
+ggsave("03_output/figures/selection/fig4_20250731.pdf", width=9, height=10)
 
 
 ####### Plot piN/piS genome level ############

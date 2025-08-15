@@ -102,7 +102,8 @@ ggplot(timeline_df %>%
   geom_point(data = timeline_df %>% filter(ngs == "seq_data"),
              aes(x=collection_date,
                  y=animal_ID, 
-                 shape = ngs), fill=NA, size=5, stroke=1, color="#6666FF") +
+                 shape = ngs), fill=NA, size=4.5, 
+             stroke=1.5, color="#6666FF") +
   geom_point(aes(fill = result), #size=ngs
              shape=21, size=3) + 
   scale_fill_discrete(type = c("#FC6666", 
@@ -111,7 +112,7 @@ ggplot(timeline_df %>%
                       na.value = NA) +
   # scale_size_manual(values = c(3, 4),
   #                       labels = c("No NGS data", "NGS data"))+
-  scale_shape_manual(values = c("seq_data" = 21),
+  scale_shape_manual(values = c("seq_data" = 23),
                      name = "",
                      labels = "Sequence data") +
   scale_x_date(
