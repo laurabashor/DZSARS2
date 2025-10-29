@@ -17,6 +17,7 @@ library(scales)
 library(lme4)
 library(car)
 library(performance)
+library(lmerTest)
 
 # set working directory 
 setwd("")
