@@ -12,12 +12,14 @@
 library(tidyverse)
 library(openxlsx)
 library(readxl)
+
 library(ggpubr)
 library(scales)
+library(cowplot)
+
 library(lme4)
-library(car)
-library(performance)
 library(lmerTest)
+library(performance)
 
 # set working directory 
 setwd("")
@@ -157,9 +159,10 @@ lion_pop <- pop %>% filter(species == "lion")
 
 # write model for lion mean pi over time
 lmm_pi <- lmer(mean_pi ~ dpi + (1|animal_ID), lion_pop)
-Anova(lmm_pi, type = "3")
-summary(lmm_pi)
 lmm_pi
+
+summary(lmm_pi) # exact p-value using Satterwaithes: 0.0000884
+
 
 # notes:
 # if there was an interaction, the slopes would not be the same by species
@@ -193,9 +196,9 @@ qqnorm(resid(lmm_pi)) # Q-Q plot, looks good
 
 # write model just for lions:
 lmm_piS <- lmer(mean_piS ~ dpi + (1|animal_ID), lion_pop)
-Anova(lmm_piS, type = "3")
-lmm_piS
-summary(lmm_piS)
+lmm_piS 
+
+summary(lmm_piS) # exact p-value using Satterwaithes: 0.000171
 
 # check assumptions
 plot(lmm_piS) # fitted vs. residuals  
