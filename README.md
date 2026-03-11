@@ -12,7 +12,7 @@ Laura Bashor 1, Emily N Gallichotte 1, Michelle Galvan 1, Katelyn Erbeck 2, Lara
 
 ~
 
-The associated manuscript is currently available on BioRxiv.org
+The associated manuscript was published in Nature Communications in December 2025: https://doi.org/10.1038/s41467-025-66402-7
 
 Next-generation sequencing datasets have been deposited in the NCBI Sequence Read Archive and are available under BioProject PRJNA1154601. 
 
